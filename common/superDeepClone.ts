@@ -2,7 +2,7 @@
    * Clone the value of an Object based Array or Object both with or without prototype.
    * Returns the new target which does not share the same pointer as source.
    * @param source : any
-   * @returns {Array<Object> || Object}
+   * @returns any
    */
 function deepClone(source: any) {
     if (Object.prototype.toString.call(source) === '[object Array]') {
