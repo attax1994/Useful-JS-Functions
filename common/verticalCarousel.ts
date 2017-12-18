@@ -1,7 +1,7 @@
 /**
  * 图片上下滚动
  */
-let arr = new Array(5);
+const arr = new Array(5);
 let currentTarget = 0;
 document.addEventListener('wheel', (event) => {
   if (event.deltaY > 0) {
