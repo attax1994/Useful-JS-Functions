@@ -10,4 +10,5 @@
 .idea/dictionaries
 .idea/libraries
 
-test/
+.vscode/*
+ test/*
