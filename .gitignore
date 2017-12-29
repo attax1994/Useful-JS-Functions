@@ -11,4 +11,5 @@
 .idea/libraries
 
 .vscode/*
- test/*
+
+test/*
