@@ -3,6 +3,6 @@
   * @param list
   * @return {(target) => any & any}
   */
-function mixins(...list) {
-    return (target) => Object.assign(target.prototype, ...list);
+function mixins(...ObjList) {
+    return (target) => Object.assign(target.prototype, ...ObjList);
 }
