@@ -1,0 +1,1 @@
+'http://www.google.com.cn'.match(/^(http|https|ftp):\/\/([\w\-]+)+?(\.[\w\-]+)+?(\.[\w\-]+)*(\.[\w\-]+)*/);
