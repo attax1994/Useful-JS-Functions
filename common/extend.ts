@@ -1,4 +1,4 @@
-// ES5 一般式
+// ES3 一般式
 function Super() {
     this.name = 'father';
     this.age = 30;
@@ -29,6 +29,10 @@ function Sub2() {
 }
 // 此时constructor为Super
 Sub2.prototype = new Super();
+// 或者使用__proto__
+Sub2.prototype['__proto__'] = Super.prototype;
+// 以及api的形式
+Sub2.prototype = Object.create(Super.prototype);
 // 需要重定位constructor
 Sub2.prototype.constructor = Sub2;
 
