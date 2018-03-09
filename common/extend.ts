@@ -29,12 +29,13 @@ function Sub2() {
 }
 // 此时constructor为Super
 Sub2.prototype = new Super();
+// 需要重定位constructor
+Sub2.prototype.constructor = Sub2;
+
 // 或者使用__proto__
 Sub2.prototype['__proto__'] = Super.prototype;
 // 以及api的形式
 Sub2.prototype = Object.create(Super.prototype);
-// 需要重定位constructor
-Sub2.prototype.constructor = Sub2;
 
 
 // ES6
