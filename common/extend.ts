@@ -48,11 +48,18 @@ class A {
     constructor() {
         this.name = 'father';
     }
+    say() {
+        console.log('Method from father');
+    }
 }
 
 class B extends A {
     constructor() {
         super();
+    }
+    say() {
+        console.log('Method from son');
+        super.say();
     }
 }
 
