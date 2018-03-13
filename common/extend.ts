@@ -32,14 +32,15 @@ Sub2.prototype = new Super();
 // 需要重定位constructor
 Sub2.prototype.constructor = Sub2;
 
-// 以及api的形式
+// 以及类似于行为委托的形式
 Sub2.prototype = Object.create(Super.prototype);
 // 需要重定位constructor
 Sub2.prototype.constructor = Sub2;
 
 // 或者使用__proto__
 Sub2.prototype.__proto__ = Super.prototype;
-
+//ES6提供一种新的操作方式
+Object.setPrototypeOf(Sub2.prototype, Super.prototype);
 
 
 // ES6
