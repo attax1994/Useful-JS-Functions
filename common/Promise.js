@@ -4,10 +4,9 @@ var FULFILLED = 1;
 var REJECTED = 2;
 
 function Promise(fn) {
-    // 都是private属性
-    var state = PENDING;
-    var value = null;
-    var handlers = [];
+    this.state = PENDING;
+    this.value = null;
+    this.handlers = [];
 
 
     /**
@@ -15,12 +14,12 @@ function Promise(fn) {
      * @param {*} result 
      */
     function fulfill(result) {
-        state = FULFILLED;
-        value = result;
+        this.state = FULFILLED;
+        this.value = result;
         // 逐个传给handle()函数，执行回调
-        handlers.forEach(handle);
+        this.handlers.forEach(handle);
         // 最后handlers置空
-        handlers = null;
+        this.handlers = null;
     }
 
 
@@ -29,12 +28,28 @@ function Promise(fn) {
      * @param {*} error 
      */
     function reject(error) {
-        state = REJECTED;
-        value = error;
+        this.state = REJECTED;
+        this.value = error;
         // 逐个传给handle()函数，执行回调
-        handlers.forEach(handle);
+        this.handlers.forEach(handle);
         // 最后handlers置空
-        handlers = null;
+        this.handlers = null;
+    }
+
+
+    /**
+     * 返回目标的then方法
+     * @param {*} value 
+     */
+    function getThen(value) {
+        var t = typeof value;
+        if (value && (t === 'ojbect' || t === 'function')) {
+            var then = value.then;
+            if (typeof then === 'function') {
+                return then;
+            }
+        }
+        return null;
     }
 
 
@@ -46,6 +61,7 @@ function Promise(fn) {
         try {
             var then = getThen(result);
             if (then) {
+                fulfill.call(this);
                 doResolve(then.bind(result), resolve, reject);
                 return;
             }
@@ -62,32 +78,16 @@ function Promise(fn) {
      */
     function handle(handler) {
         // 异步还没有完成，handler入栈
-        if (state === PENDING) {
-            handlers.push(handler);
+        if (this.state === PENDING) {
+            this.handlers.push(handler);
         } else {
-            if (state === FULFILLED && typeof handler.onFulfilled === 'function') {
+            if (this.state === FULFILLED && typeof handler.onFulfilled === 'function') {
                 handler.onFulfilled(value);
             }
-            if (state === REJECTED && typeof handler.onRejected === 'function') {
+            if (this.state === REJECTED && typeof handler.onRejected === 'function') {
                 handler.onRejected(value);
             }
         }
-    }
-
-
-    /**
-    * 返回目标的then方法
-    * @param {*} value 
-    */
-    function getThen(value) {
-        var t = typeof value;
-        if (value && (t === 'ojbect' || t === 'function')) {
-            var then = value.then;
-            if (typeof then === 'function') {
-                return then;
-            }
-        }
-        return null;
     }
 
 
@@ -124,29 +124,31 @@ function Promise(fn) {
      */
     this.then = function (onFulfilled, onRejected) {
         var self = this;
-        return new Promise(function (resolve, reject) {
-            return self.done(function (result) {
-                if (typeof onFulfilled === 'function') {
-                    try {
-                        return resolve(onFulfilled(result));
-                    } catch (ex) {
-                        return reject(ex);
+        return new Promise(
+            function (resolve, reject) {
+                return self.done(function (result) {
+                    if (typeof onFulfilled === 'function') {
+                        try {
+                            return resolve(onFulfilled(result));
+                        } catch (ex) {
+                            return reject(ex);
+                        }
+                    } else {
+                        return resolve(result);
                     }
-                } else {
-                    return resolve(result);
-                }
-            }, function (error) {
-                if (typeof onRejected === 'function') {
-                    try {
-                        return resolve(onRejected(error));
-                    } catch (ex) {
-                        return reject(ex);
+                }, function (error) {
+                    if (typeof onRejected === 'function') {
+                        try {
+                            return resolve(onRejected(error));
+                        } catch (ex) {
+                            return reject(ex);
+                        }
+                    } else {
+                        return reject(error);
                     }
-                } else {
-                    return reject(error);
-                }
-            });
-        });
+                });
+            }
+        );
     };
 
 
@@ -167,4 +169,3 @@ function Promise(fn) {
 
     doResolve(fn, resolve, reject);
 }
-
