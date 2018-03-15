@@ -12,13 +12,8 @@
     // 用树形结构去记录then注册的hanlder，然后等到主Promise决议了，在_excuteThen中操作then返回Promise的状态和结果值
     this._handlers = [];
 
-    var enqueue = function (fn) {
-      // process.nextTick(fn); // NodeJS
-      setTimeout(fn, 0);
-    }
-
     if (fn) {
-      enqueue(fn(this._resolve.bind(this), this._reject.bind(this)));
+      this._enqueue(fn.bind(null, this._resolve.bind(this), this._reject.bind(this)));
     }
     return this;
   }
@@ -85,12 +80,35 @@
    * @param {*} handler 
    */
   Promise.prototype._excuteThen = function (handler) {
+    // then返回的promise的执行也使用异步的方式触发
     if (this._state === FULFILLED && typeof handler.onFulfilled === 'function') {
-      handler.promise._resolve(handler.onFulfilled(this._value));
+      this._enqueue(
+        handler.promise._resolve.bind(
+          handler.promise,
+          handler.onFulfilled(this._value)
+        )
+      );
+      /* handler.promise._reject(handler.onFulfilled(this._value)); */
     }
     if (this._state === REJECTED && typeof handler.onRejected === 'function') {
-      handler.promise._reject(handler.onRejected(this._value));
+      this._enqueue(
+        handler.promise._resolve.bind(
+          handler.promise,
+          handler.onRejected(this._value)
+        )
+      );
+      /* handler.promise._reject(handler.onRejected(this._value)); */
     }
+  };
+
+
+  /**
+   * 将fn加入事件循环
+   * @param {Function} fn 
+   */
+  Promise.prototype._enqueue = function(fn){
+    // process.nextTick(fn); // NodeJS
+    setTimeout(fn.bind(this), 0);
   };
 
 
