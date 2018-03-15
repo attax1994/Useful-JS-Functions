@@ -80,14 +80,15 @@
    * @param {*} handler 
    */
   Promise.prototype._excuteThen = function (handler) {
-    // then返回的promise的执行也使用异步的方式触发
     if (this._state === FULFILLED && typeof handler.onFulfilled === 'function') {
+      // 异步触发then
       this._enqueue(
         handler.promise._resolve.bind(
           handler.promise,
           handler.onFulfilled(this._value)
         )
       );
+      // 同步触发then
       /* handler.promise._reject(handler.onFulfilled(this._value)); */
     }
     if (this._state === REJECTED && typeof handler.onRejected === 'function') {
@@ -115,6 +116,7 @@
   window.Promise = Promise;
 }());
 
+
 var p = new Promise(function (resolve) {
   setTimeout(() => {
     resolve('123')
@@ -128,3 +130,12 @@ var aap = ap.then((data) => {
   console.log(data);
   return 'aap';
 });
+
+// 异步触发情况下就要注意回调的值
+for(var i=0; i<100; i++){
+  (function(j){
+    p.then((data)=>{
+      return j;
+    });
+  })(i);
+}
