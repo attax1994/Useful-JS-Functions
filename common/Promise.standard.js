@@ -1,5 +1,7 @@
 ;
 (function () {
+  'use strict';
+
   var PENDING = 0;
   var FULFILLED = 1;
   var REJECTED = 2;
@@ -7,7 +9,7 @@
   function Promise(fn) {
     this._state = PENDING;
     this._value = null;
-    this._thenResult = null;
+    // 用树形结构去记录then注册的hanlder，然后等到主Promise决议了，在_excuteThen中操作then返回Promise的状态和结果值
     this._handlers = [];
 
     var enqueue = function (fn) {
@@ -15,92 +17,82 @@
       setTimeout(fn, 0);
     }
 
-    var resolve = (function (result) {
-      // 只有PENDING情况下才能修改状态
-      if (this._state === PENDING) {
-        this._state = FULFILLED;
-        this._value = result;
-        this._handlers.forEach(excuteThen.bind(this));
-        this._handlers = null;
-      }
-    }).bind(this);
-
-    var reject = (function (result) {
-      // 只有PENDING情况下才能修改状态
-      if (this._state === PENDING) {
-        this._state = REJECTED;
-        this._value = reason;
-        this._handlers.forEach(excuteThen.bind(this));
-        this._handlers = null;
-      }
-    }).bind(this);
-
-    /**
-     * 暂时使用同步方式执行then注册的回调，如需异步则使用enqueue包装
-     * @param {*} handler 
-     */
-    var excuteThen = (function (handler) {
-      var result;
-      if (this._state === FULFILLED && typeof handler.onFulfilled === 'function') {
-        this._thenResult = handler.onFulfilled(this._value);
-      }
-      if (this._state === REJECTED && typeof handler.onRejected === 'function') {
-        this._thenResult = handler.onRejected(this._value);
-      }
-    }).bind(this);
-
     if (fn) {
-      enqueue(fn(resolve, reject));
+      enqueue(fn(this._resolve.bind(this), this._reject.bind(this)));
     }
     return this;
   }
 
+
+  /**
+   * Promise的then方法。
+   * 注册新的handler，挂载到handlers树上。
+   * 返回该hanlder的promise引用，用于链式调用。
+   * 返回的promise的_value取决于then传入的onFulfilled或onRejected函数的返回值。
+   * @param {*} onFulfilled 
+   * @param {*} onRejected 
+   */
   Promise.prototype.then = function (onFulfilled, onRejected) {
     var handler = {
       onFulfilled: onFulfilled,
       onRejected: onRejected,
+      promise: new Promise(),
     };
-    var self = this;
 
-
+    // 先压入堆栈，形成树形结构
+    var index = this._handlers.push(handler) - 1;
     // 已经决议了，直接执行then
     if (this._state !== PENDING) {
-      this.excuteThen(handler);
-    }
-    // 还没决议，压入handlers堆栈
-    else {
-      this._handlers.push(handler);
+      this._excuteThen(handler);
     }
 
-    var thenable = new Promise((resolve, reject) => {
-      if (self._state === FULFILLED) {
-        resolve(self._value);
-      }
-      if (self._state === REJECTED) {
-        reject(self._value);
-      }
-    });
-    // _state指向Promise本体的_state
-    Object.defineProperty(thenable, '_state', {
-      get: function () {
-        return self._state;
-      },
-      configurable: false,
-      enumerable: false,
-    });
+    return this._handlers[index].promise;
+  };
 
-    // _value指向上一个then的_thenResult
-    Object.defineProperty(thenable, '_value', {
-      get: function () {
-        /**
-         * 如何获取异步上一个then返回的值？是否用它的setter？
-         */
-      },
-      configurable: false,
-      enumerable: false,
-    });
-    return thenable;
-  }
+
+  /**
+   * Promise的resolve方法。
+   * 行为包括状态置位，修改结果，然后执行先前压入堆栈的then
+   * @param {*} result 
+   */
+  Promise.prototype._resolve = function (result) {
+    // 只有PENDING情况下才能修改状态
+    if (this._state === PENDING) {
+      this._state = FULFILLED;
+      this._value = result;
+      this._handlers.forEach(this._excuteThen.bind(this));
+    }
+  };
+
+
+  /**
+   * Promise的reject方法
+   * @param {*} result 
+   */
+  Promise.prototype._reject = function (result) {
+    // 只有PENDING情况下才能修改状态
+    if (this._state === PENDING) {
+      this._state = REJECTED;
+      this._value = reason;
+      this._handlers.forEach(this._excuteThen.bind(this));
+    }
+  };
+
+
+  /**
+   * 执行then，同时也通知then返回的promise去执行resolve或reject。
+   * then中的_value最终使用的值是then中onFulfilled或onRejected的返回值。
+   * @param {*} handler 
+   */
+  Promise.prototype._excuteThen = function (handler) {
+    if (this._state === FULFILLED && typeof handler.onFulfilled === 'function') {
+      handler.promise._resolve(handler.onFulfilled(this._value));
+    }
+    if (this._state === REJECTED && typeof handler.onRejected === 'function') {
+      handler.promise._reject(handler.onRejected(this._value));
+    }
+  };
+
 
   window.Promise = Promise;
 }());
@@ -108,12 +100,13 @@
 var p = new Promise(function (resolve) {
   setTimeout(() => {
     resolve('123')
-  }, 10000);
+  }, 1000);
 });
 var ap = p.then((data) => {
   console.log(data);
   return 321;
-}).then((data) => {
-  console.log(data);
 });
-ap;
+var aap = ap.then((data) => {
+  console.log(data);
+  return 'aap';
+});
