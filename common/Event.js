@@ -24,11 +24,10 @@ myEvent.emit = function (type, data) {
     }));
 };
 
-// useage
 _Event.on('search', e => {
     console.log(e.detail);
 });
-_Event.emit('search', 'study frontend in jirengu.com');
+_Event.emit('search', 'Search Event');
 
 
 /**
@@ -38,30 +37,61 @@ var Event = (function () {
     // private的_events记录每种event的handlers
     var _events = {};
 
+    /**
+     * 注册一个Event的handler
+     * @param {String} evt 
+     * @param {*} handler 
+     */
     function on(evt, handler) {
-        _events[evt] = events[_evt] || [];
+        _events[evt] = _events[evt] || [];
+        // 如果是没有名称的话就无法删除
         _events[evt].push({
-            handler: handler
+            name: handler.name || 'anonymous',
+            handler: handler,
         });
     }
 
-    function trigger(evt, args) {
-        if (!events[evt]) {
+    /**
+     * 触发一种Event，并传入数据
+     * @param {String} evt 
+     * @param {*} args 
+     */
+    function emit(evt, args) {
+        if (!_events[evt]) {
             return;
         }
-        for (var i = 0, ii = events[evt].length; i < ii; i++) {
-            events[evt][i].handler(args);
+        for (var i = 0, ii = _events[evt].length; i < ii; i++) {
+            _events[evt][i].handler(args);
         }
-
     }
+
+    /**
+     * 用来移除非匿名的handler
+     * @param {String} evt 
+     * @param {String} name 
+     */
+    function remove(evt, name) {
+        if (!_events[evt]) {
+            return;
+        }
+        _events[evt] = _events[evt].filter(value => {
+            return value.name !== name;
+        });
+    }
+
     return {
         on: on,
-        trigger: trigger
+        emit: emit,
+        remove: remove,
     };
 })();
 
-Event.on('search', function (data) {
+Event.on('search', function dosth(data) {
     console.log(data);
-})
+});
 
-Event.trigger('search', '饥人谷');
+Event.emit('search', '123');
+
+Event.remove('search', 'dosth');
+
+Event.emit('search', '123');
