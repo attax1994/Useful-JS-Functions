@@ -57,11 +57,12 @@ var Event = (function () {
      * @param {*} args 
      */
     function emit(evt, args) {
-        if (!_events[evt]) {
+        var handlers = _events[evt];
+        if (!handlers) {
             return;
         }
-        for (var i = 0, ii = _events[evt].length; i < ii; i++) {
-            _events[evt][i].handler(args);
+        for (var i = 0, ii = handlers.length; i < ii; i++) {
+            handlers[i].handler(args);
         }
     }
 
