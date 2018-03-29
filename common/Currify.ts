@@ -39,3 +39,12 @@ function curry(fn, scope) {
 function currifyWithBind(fn: Function, thisArg: any = null, ...args: Array<any>) {
     return fn.bind(thisArg, ...args);
 }
+
+/**
+ * Currify on prototype chain
+ */
+Function.prototype['currify'] = function (thisArg, ...args) {
+    return (...newArgs) => {
+        return this.call(thisArg, ...args, ...newArgs);
+    };
+}
