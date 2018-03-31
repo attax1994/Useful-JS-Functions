@@ -47,7 +47,7 @@ var inListUnrec = [];
 var inOrdreUnrecursive = function (node) {
     if (node) {
         var stack = [];
-        if (stack.length || node) {
+        while (stack.length || node) {
             if (node) {
                 // 从最左侧的子节点开始，如果有左节点，就先推入左节点
                 stack.push(node);
