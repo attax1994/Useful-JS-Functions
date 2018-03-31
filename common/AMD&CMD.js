@@ -28,8 +28,7 @@ var ModuleManager = (function () {
     var _modules = {};
 
     function getModule(name) {
-        var _module = _modules[name];
-        return _module || {};
+        return _modules[name] || {};
     }
 
     function define(name, deps, fn) {
@@ -47,8 +46,7 @@ var ModuleManager = (function () {
         }
 
         var depsModules = [];
-        var len = deps.length;
-        for (var i = 0; i < len; i++) {
+        for (var i = 0, len = deps.length; i < len; i++) {
             depsModules.push(getModule(deps[i]));
         }
 
@@ -65,8 +63,7 @@ var ModuleManager = (function () {
         }
 
         var depsModules = [];
-        var len = deps.length;
-        for (var i = 0; i < len; i++) {
+        for (var i = 0, len = deps.length; i < len; i++) {
             depsModules.push(getModule(deps[i]));
         }
 
