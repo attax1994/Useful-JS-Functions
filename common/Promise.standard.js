@@ -9,7 +9,7 @@
   function Promise(fn) {
     this._state = PENDING;
     this._value = null;
-    // 用树形结构去记录then注册的hanlder，然后等到主Promise决议了，在_excuteThen中操作then返回Promise的状态和结果值
+    // 用树形结构去记录then注册的hanlder，然后等到主Promise决议了，在_executeThen中操作then返回Promise的状态和结果值
     this._handlers = [];
 
     if (fn) {
@@ -38,7 +38,7 @@
     var index = this._handlers.push(handler) - 1;
     // 已经决议了，直接执行then
     if (this._state !== PENDING) {
-      this._excuteThen(handler);
+      this._executeThen(handler);
     }
 
     return this._handlers[index].promise;
@@ -55,7 +55,7 @@
     if (this._state === PENDING) {
       this._state = FULFILLED;
       this._value = result;
-      this._handlers.forEach(this._excuteThen.bind(this));
+      this._handlers.forEach(this._executeThen.bind(this));
     }
   };
 
@@ -69,7 +69,7 @@
     if (this._state === PENDING) {
       this._state = REJECTED;
       this._value = reason;
-      this._handlers.forEach(this._excuteThen.bind(this));
+      this._handlers.forEach(this._executeThen.bind(this));
     }
   };
 
@@ -79,7 +79,7 @@
    * then中的_value最终使用的值是then中onFulfilled或onRejected的返回值。
    * @param {*} handler 
    */
-  Promise.prototype._excuteThen = function (handler) {
+  Promise.prototype._executeThen = function (handler) {
     if (this._state === FULFILLED && typeof handler.onFulfilled === 'function') {
       // 异步触发then
       this._enqueue(
