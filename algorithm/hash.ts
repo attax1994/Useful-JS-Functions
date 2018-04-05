@@ -10,9 +10,10 @@ function BKDRHash(str: String) {
 
     while (str[index]) {
         hash = hash * seed + str.charCodeAt(index++);
+        hash &= 0xFFFF;
     }
 
-    return (hash & 0xFFFF);
+    return hash;
 }
 
 
