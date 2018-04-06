@@ -13,7 +13,7 @@ function mergeSort(arr: Array<number>) {
 function merge(left: Array<number>, right: Array<number>) {
     var result = [];
 
-    while (left.length > 0 && right.length > 0) {
+    while (left.length && right.length) {
         if (left[0] <= right[0]) {
             result.push(left.shift());
         } else {
