@@ -1,5 +1,4 @@
-;
-(function () {
+; (function () {
   'use strict';
 
   var PENDING = 0;
@@ -64,7 +63,7 @@
    * Promise的reject方法
    * @param {*} result 
    */
-  Promise.prototype._reject = function (result) {
+  Promise.prototype._reject = function (reason) {
     // 只有PENDING情况下才能修改状态
     if (this._state === PENDING) {
       this._state = REJECTED;
@@ -107,7 +106,7 @@
    * 将fn加入事件循环
    * @param {Function} fn 
    */
-  Promise.prototype._enqueue = function(fn){
+  Promise.prototype._enqueue = function (fn) {
     // process.nextTick(fn); // NodeJS
     setTimeout(fn.bind(this), 0);
   };
@@ -132,9 +131,9 @@ var aap = ap.then((data) => {
 });
 
 // 异步触发情况下就要注意回调的值
-for(var i=0; i<100; i++){
-  (function(j){
-    p.then((data)=>{
+for (var i = 0; i < 100; i++) {
+  (function (j) {
+    p.then((data) => {
       return j;
     });
   })(i);
