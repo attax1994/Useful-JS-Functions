@@ -17,7 +17,7 @@
 */
 
 var len = 20
-var used = [[1, 1], [4, 2], [6, 4], [10, 2], [16, 2]]
+var used = [[4, 2], [6, 4], [10, 2], [16, 2]]
 var use = 2
 
 calcFreeSpace(len, used, use)
@@ -30,13 +30,13 @@ calcFreeSpace(len, [], use)
  0                 1                   2
  1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
 
-|*|_|_|*|*|*|*|*|*|*|*|_|_|_|_|*|*|_|_|_|
+|_|_|_|*|*|*|*|*|*|*|*|_|_|_|_|*|*|_|_|_|
 
 */
 
 function calcFreeSpace(len, used, use) {
     let empty = [],
-        lastIndex = 1, lastLength = 0,
+        lastIndex = 1, lastLength = 0, emptyStart = 1,
         currentIndex, currentLength,
         record,
         result = [];
@@ -44,14 +44,18 @@ function calcFreeSpace(len, used, use) {
     // 1. 寻找空位堆
     used.forEach((value) => {
         [currentIndex, currentLength] = value;
-        if (currentIndex > lastIndex + lastLength) {
-            empty.push([lastIndex + lastLength, currentIndex - lastIndex - lastLength]);
+        if (currentIndex > emptyStart) {
+            empty.push([
+                emptyStart,
+                currentIndex - emptyStart
+            ]);
         }
         [lastIndex, lastLength] = [currentIndex, currentLength];
+        emptyStart = lastIndex + lastLength;
     });
-    // 1.1 记得最后收尾
-    if (len > lastIndex + lastLength - 1) {
-        empty.push([lastIndex + lastLength, len + 1 - lastIndex - lastLength]);
+    // 1.1 记得检查尾部
+    if (len >= emptyStart) {
+        empty.push([emptyStart, len + 1 - emptyStart]);
     }
 
     // 2. 检查每个空位堆，选取长度合适的堆
@@ -60,8 +64,9 @@ function calcFreeSpace(len, used, use) {
         if (currentLength >= use) {
             // 每次向后移一位
             for (let i = 0; i <= currentLength - use; i++) {
-                // 生成记录
+                // 一定要重新赋值，解耦原来的引用，否则push进的引用类型会出现错误结果
                 record = [];
+                // 生成记录
                 for (let j = 0; j < use; j++) {
                     record[j] = currentIndex + i + j;
                 }

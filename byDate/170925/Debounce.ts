@@ -3,8 +3,7 @@
  * 最后一次调用时刻的wait毫秒后。对于必须在一些输入（用户操作）停止到达之后执行的行为有帮助。例如：渲染一个MarkDown格式的
  * 评论预览，当窗口停止改变大小之后重新计算布局])
  */
-
-function now() {
+function nowTimeStamp() {
     return new Date().getTime();
 }
 
@@ -12,7 +11,7 @@ function debounce(func, wait, immediate) {
     var timeout, args, context, timestamp, result;
 
     var later = function () {
-        var last = now() - timestamp;
+        var last = nowTimeStamp() - timestamp;
         // 未达到等待时间
         if (last < wait && last >= 0) {
             timeout = setTimeout(later, wait - last);
@@ -40,5 +39,18 @@ function debounce(func, wait, immediate) {
             context = args = null;
         }
         return result;
+    }
+}
+
+function debounceTime(fn: any, delay: number, thisArg?: any) {
+    let debouncer;
+
+    return function (...args) {
+        if (debouncer) {
+            clearTimeout(debouncer);
+        }
+        debouncer = setTimeout(() => {
+            fn.apply(thisArg, args);
+        }, delay);
     }
 }
