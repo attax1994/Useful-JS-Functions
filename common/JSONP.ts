@@ -1,94 +1,52 @@
 var JSONP = (function () {
-    var counter = 0,
-        head, query, key, window = this;
+    function get({ url, params = {}, callbackName, callback, errorCallback = () => { console.log(`${callbackName} timed out!`) } }
+        : { url: string, params?: Object, callbackName: string, callback: Function, errorCallback?: Function }) {
+        function removeNode() {
+            try {
+                delete window[callbackName];
+            } catch (e) {
+            }
+            window[callbackName] = null;
+        }
 
-    function load(url) {
-        var script = document.createElement('script');
-        var done = false;
-        script.src = url;
+        // 处理query参数
+        let query = '?';
+        for (const key in params) {
+            if (params.hasOwnProperty(key)) {
+                query += `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}&`;
+            }
+        }
+
+        // 加载js文件
+        const script = document.createElement('script');
+        let done = false;
+        script.src = url + query;
         script.async = true;
-
         script.onload = script['onreadystatechange'] = function () {
-            if (!done && (!this.readyState || this.readyState === "loaded" || this.readyState === "complete")) {
+            if (!done) {
                 done = true;
-                script.onload = script['onreadystatechange'] = null;
-                if (script && script.parentNode) {
-                    script.parentNode.removeChild(script);
+                script.onload = null;
+                if (script) {
+                    document.body.removeChild(script);
                 }
             }
         };
-        if (!head) {
-            head = document.getElementsByTagName('head')[0];
-        }
-        head.appendChild(script);
-    }
+        document.body.appendChild(script);
 
-    function jsonp(url, params, error, callback) {
-        query = "?";
-        params = params || {};
-        for (key in params) {
-            if (params.hasOwnProperty(key)) {
-                query += encodeURIComponent(key) + "=" + encodeURIComponent(params[key]) + "&";
-            }
-        }
-        var jsonp = "json" + (++counter);
-        window[jsonp] = function (data) {
+        // 注册回调，使用后随即删除
+        window[callbackName] = (data: any) => {
             callback(data);
-            try {
-                delete window[jsonp];
-            } catch (e) { }
-            window[jsonp] = null;
+            removeNode()
         };
 
-        load(url + query + "callback=" + jsonp);
-
-        error = error ||
-            function () { };
-
-        window.setTimeout(function () {
-            if (typeof window[jsonp] == "function") {
-
-                // replace success with null callback in case the request is just very latent.
-                window[jsonp] = function (data) {
-                    try {
-                        delete window[jsonp];
-                    } catch (e) { }
-                    window[jsonp] = null;
-                };
-
-                // call the error callback
-                error();
-
-                // set a longer timeout to safely clean up the unused callback.
-                window.setTimeout(function () {
-                    if (typeof window[jsonp] == "function") {
-                        try {
-                            delete window[jsonp];
-                        } catch (e) { }
-                        window[jsonp] = null;
-                    };
-                }, 120000);
-            };
+        // 超时处理
+        setTimeout(function () {
+            if (typeof window[callbackName] === "function") {
+                errorCallback();
+                removeNode();
+            }
         }, 10000);
-
-        return jsonp;
     }
 
-    
-    return {
-        get: jsonp
-    };
+    return { get };
 }());
-
-/*
-Example:
-----------------
-
-var url = 'http://blog.eood.cn/api';
-var error = function() {alert('error');};
-var success = function(data) {
-        // process the data
-};
-JSONP.get( url, {'parm1': 'parm1_value', 'parm2': 'parm2_value'}, error, success);
-
-*/
