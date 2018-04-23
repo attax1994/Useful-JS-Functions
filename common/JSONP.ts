@@ -47,7 +47,7 @@ export default class JSONPService {
     window[callbackName] = null;
   }
 
-  get({
+  public get({
     url, params = {}, callbackName, callback,
     errorCallback = () => {
       console.log(`${callbackName} timed out!`)
@@ -70,7 +70,7 @@ export default class JSONPService {
     JSONPService.loadJSONP(url + JSONPService.generateQueryParam(params));
   }
 
-  getByPromise({ url, params = {}, callbackName, }: { url: string, params?: Object, callbackName: string }): Promise<any> {
+  public getByPromise({ url, params = {}, callbackName, }: { url: string, params?: Object, callbackName: string }): Promise<any> {
     return new Promise((resolve, reject) => {
       // 成功则执行resolve
       window[callbackName] = (data) => {
