@@ -11,7 +11,7 @@ export default class JSONPService {
         temp += `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}&`;
       }
     }
-    return temp;
+    return temp === '?' ? '' : temp.slice(0, -1);
   }
 
   /**
