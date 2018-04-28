@@ -64,3 +64,28 @@ class B extends A {
     }
 }
 
+// typescript的转译
+function __extends(d: Function, b: Function) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+}
+
+var base = (function () {
+    function base() { }
+    return base;
+})();
+
+var sub = (function (_super) {
+    __extends(sub, _super);
+
+    function sub(param) {
+        _super.call(this);
+        this.param = param;
+    }
+
+    sub.prototype.someMethod = function () { };
+
+    return sub;
+})(base);
