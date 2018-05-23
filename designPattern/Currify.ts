@@ -1,4 +1,20 @@
 /**
+ * An adapative version of curry funciton.
+ * It will not invoke the function until enough arguments have been passed.
+ * @param fn {Function} Function to be currified.
+ * @returns fn {Function}   Closure for target function, 
+ * allowed to be invoked for multiple times until enough arguments have been passed.
+ * Example: 
+ * const currifiedSum4 = adapativeCurry(function sum4(a, b, c, d) {
+ *  return a + b + c + d
+ * })
+ */
+const adapativeCurry = (fn: Function) => (...args: Array<any>) =>
+    args.length >= fn.length
+        ? fn(...args)
+        : (...innerArgs: Array<any>) => fn(...args, ...innerArgs)
+
+/**
  * ES6 version of curry function.
  * @param fn function to be currified
  * @param thisArg this argument, default is null, standing for window or global
