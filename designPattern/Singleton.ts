@@ -1,3 +1,20 @@
+export interface SingletonFunction extends ObjectConstructor {
+  $instance?: any
+}
+export function generateSingleton(fn: SingletonFunction, ...args: Array<any>): () => SingletonFunction {
+  !fn.$instance &&
+    (Object.defineProperty
+      ? Object.defineProperty(fn, '$instance', {
+        value: new fn(...args),
+        writable: false,
+        configurable: false,
+        enumerable: false
+      })
+      : fn.$instance = new fn(...args)
+    )
+  return () => fn.$instance
+}
+
 export class Singleton {
   private static instance = Object.seal(new Singleton());
 
@@ -17,4 +34,3 @@ export class Singleton {
   }
 
 }
-
