@@ -1,32 +1,46 @@
-function quickSort(arr: Array<number>, left: number, right: number) {
-    var len = arr.length,
-        partitionIndex,
-        left = typeof left !== 'number' ? 0 : left,
-        right = typeof right !== 'number' ? len - 1 : right;
+/**
+ * 快速排序
+ * 性能：时间 O(nlogn)，空间 O(1)
+ * 概念：在每一趟排序的过程中，设置一个基准值（pivot），将小于pivot的元素向前迁移
+ * 
+ */
+function quickSort(arr: number[], left: number = 0, right: number = arr.length - 1) {
+    let partitionIndex
 
     if (left < right) {
-        partitionIndex = partition(arr, left, right);
-        quickSort(arr, left, partitionIndex - 1);
-        quickSort(arr, partitionIndex + 1, right);
+        partitionIndex = partition(arr, left, right)
+        // 分割为比pivot小和比pivot大的两个数组，分别排序（二分法）
+        quickSort(arr, left, partitionIndex - 1)
+        quickSort(arr, partitionIndex + 1, right)
     }
-    return arr;
+
+    return arr
 }
 
-function partition(arr: Array<number>, left: number, right: number) {     // 分区操作
-    var pivot = left,                      // 设定基准值（pivot）
-        index = pivot + 1;
+
+// 分区操作
+function partition(arr: number[], left: number, right: number) {
+    // 以最左侧的元素为基准值（pivot）
+    let pivot = left
+        , index = pivot + 1
+
     for (var i = index; i <= right; i++) {
+        // 小于基准值的数字放入左侧，用index记录pivot插入位置
         if (arr[i] < arr[pivot]) {
-            swap(arr, i, index);
-            index++;
+            swap(arr, i, index)
+            index++
         }
     }
-    swap(arr, pivot, index - 1);
-    return index - 1;
+
+    const partitionIndex = index - 1
+    // 将pivot插入对应位置，从而进行下一轮的排序
+    swap(arr, pivot, partitionIndex)
+    return partitionIndex
 }
 
-function swap(arr: Array<number>, i: number, j: number) {
-    var temp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = temp;
+
+function swap(arr: number[], i: number, j: number) {
+    let temp = arr[i]
+    arr[i] = arr[j]
+    arr[j] = temp
 }
