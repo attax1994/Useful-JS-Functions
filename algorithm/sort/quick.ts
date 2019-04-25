@@ -1,8 +1,10 @@
 /**
  * 快速排序
  * 性能：时间 O(nlogn)，空间 O(1)
- * 概念：在每一趟排序的过程中，设置一个基准值（pivot），将小于pivot的元素向前迁移
- * 
+ * 原理：在每一趟排序的过程中，设置一个基准值（pivot），
+ * 将每个区块内的元素与之比对，小于pivot的元素向前迁移，
+ * 同时用index记录pivot在比对完成后，应当插入的位置，插入后pivot处于正确的位置。
+ * 然后从这个位置开始，分割数组，分别排序。
  */
 function quickSort(arr: number[], left: number = 0, right: number = arr.length - 1) {
     let partitionIndex
