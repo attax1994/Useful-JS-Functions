@@ -1,35 +1,7 @@
-interface UFI {
-  /**
-   * 执行方法
-   * @param dataSet 
-   */
-  apply(dataSet: number[][]): void
-
-  /**
-   * 在p和q之间添加一条连接线
-   * @param p 
-   * @param q 
-   */
-  union(p: number, q: number): void
-
-  /**
-   * p所在的分量标识符（0 到 N-1）
-   * @param p 
-   */
-  find(p: number): number
-
-  /**
-   * 检查p和q之间是否存在连接线
-   * @param p 
-   * @param q 
-   */
-  connected(p: number, q: number): boolean
-}
-
 /**
  * Union-Find算法，核心的union-find模块使用加权quick-union的方式实现。
  */
-class UF implements UFI {
+class UF {
   private _id: number[] = []      // 分量id
   private _size: number[] = []    // 各触点的根节点所对应的分量大小
   private _count: number = 0      // 分量数量
@@ -43,6 +15,10 @@ class UF implements UFI {
     }
   }
 
+  /**
+   * 执行方法
+   * @param dataSet 
+   */
   apply(connectionList: number[][]): void {
     console.log('Original Id', this._id)
     for (let connection of connectionList) {
@@ -57,6 +33,11 @@ class UF implements UFI {
     console.log('Result Id', this._id)
   }
 
+  /**
+   * 在p和q之间添加一条连接线
+   * @param p 
+   * @param q 
+   */
   union(p: number, q: number): void {
     let proot = this.find(p)
       , qroot = this.find(q)
@@ -76,6 +57,10 @@ class UF implements UFI {
     this._count--
   }
 
+  /**
+   * p所在的分量标识符（0 到 N-1）
+   * @param p 
+   */
   find(p: number): number {
     // 向上溯源，找到自反的端点
     while (p !== this._id[p]) {
@@ -84,6 +69,11 @@ class UF implements UFI {
     return p
   }
 
+  /**
+   * 检查p和q之间是否存在连接线
+   * @param p 
+   * @param q 
+   */
   connected(p: number, q: number): boolean {
     return this.find(p) === this.find(q)
   }
